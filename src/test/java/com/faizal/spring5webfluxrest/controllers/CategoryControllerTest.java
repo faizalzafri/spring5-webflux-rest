@@ -6,11 +6,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
+import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 
 public class CategoryControllerTest {
 
@@ -52,4 +54,20 @@ public class CategoryControllerTest {
                 .expectBody(Category.class);
 
     }
+
+    @Test
+    public void create() throws Exception {
+        BDDMockito.given(categoryRepository.saveAll(any(Publisher.class)))
+                .willReturn(Flux.just(Category.builder().build()));
+
+        Mono<Category> category = Mono.just(Category.builder().description("Category1").build());
+
+        webTestClient.post()
+                .uri("/api/v1/categories")
+                .body(category, Category.class)
+                .exchange()
+                .expectStatus().isCreated();
+    }
+
+
 }

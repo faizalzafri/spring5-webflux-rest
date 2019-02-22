@@ -2,10 +2,9 @@ package com.faizal.spring5webfluxrest.controllers;
 
 import com.faizal.spring5webfluxrest.domain.Category;
 import com.faizal.spring5webfluxrest.repositories.CategoryRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.reactivestreams.Publisher;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,4 +26,12 @@ public class CategoryController {
     Mono<Category> getById(@PathVariable String id) {
         return categoryRepository.findById(id);
     }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping
+    Mono<Void> create(@RequestBody Publisher<Category> categoryPublisher) {
+        return categoryRepository.saveAll(categoryPublisher).then();
+    }
+
+
 }
