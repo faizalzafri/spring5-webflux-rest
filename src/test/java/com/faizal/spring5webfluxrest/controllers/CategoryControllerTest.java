@@ -11,8 +11,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class CategoryControllerTest {
 
@@ -81,6 +82,46 @@ public class CategoryControllerTest {
                 .body(category, Category.class)
                 .exchange()
                 .expectStatus().isOk();
+    }
+
+    @Test
+    public void patch() throws Exception {
+        BDDMockito.given(categoryRepository.findById(anyString()))
+                .willReturn(Mono.just(Category.builder().build()));
+
+        BDDMockito.given(categoryRepository.save(any(Category.class)))
+                .willReturn(Mono.just(Category.builder().build()));
+
+        Mono<Category> category = Mono.just(Category.builder().description("Category1").build());
+
+        webTestClient.patch()
+                .uri("/api/v1/categories/someId")
+                .body(category, Category.class)
+                .exchange()
+                .expectStatus().isOk();
+
+
+        verify(categoryRepository, times(1)).save(any());
+    }
+
+    @Test
+    public void patchWithNoArgs() throws Exception {
+        BDDMockito.given(categoryRepository.findById(anyString()))
+                .willReturn(Mono.just(Category.builder().build()));
+
+        BDDMockito.given(categoryRepository.save(any(Category.class)))
+                .willReturn(Mono.just(Category.builder().build()));
+
+        Mono<Category> category = Mono.just(Category.builder().build());
+
+        webTestClient.patch()
+                .uri("/api/v1/categories/someId")
+                .body(category, Category.class)
+                .exchange()
+                .expectStatus().isOk();
+
+
+        verify(categoryRepository, never()).save(any());
     }
 
 

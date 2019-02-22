@@ -1,6 +1,5 @@
 package com.faizal.spring5webfluxrest.controllers;
 
-import com.faizal.spring5webfluxrest.domain.Category;
 import com.faizal.spring5webfluxrest.domain.Vendor;
 import com.faizal.spring5webfluxrest.repositories.VendorRepository;
 import org.junit.Before;
@@ -16,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class VendorControllerTest {
 
@@ -87,6 +87,46 @@ public class VendorControllerTest {
                 .body(vendorMono, Vendor.class)
                 .exchange()
                 .expectStatus().isOk();
+    }
+
+    @Test
+    public void patch() throws Exception {
+
+        BDDMockito.given(vendorRepository.findById(anyString()))
+                .willReturn(Mono.just(Vendor.builder().firstname("").lastname("").build()));
+
+        BDDMockito.given(vendorRepository.save(any(Vendor.class)))
+                .willReturn(Mono.just(Vendor.builder().build()));
+
+        Mono<Vendor> vendorMono = Mono.just(Vendor.builder().firstname("name").lastname("name").build());
+
+        webTestClient.patch()
+                .uri("/api/v1/vendors/someId")
+                .body(vendorMono, Vendor.class)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(vendorRepository, times(1)).save(any());
+    }
+
+    @Test
+    public void patchWithNoArgs() throws Exception {
+
+        BDDMockito.given(vendorRepository.findById(anyString()))
+                .willReturn(Mono.just(Vendor.builder().build()));
+
+        BDDMockito.given(vendorRepository.save(any(Vendor.class)))
+                .willReturn(Mono.just(Vendor.builder().build()));
+
+        Mono<Vendor> vendorMono = Mono.just(Vendor.builder().build());
+
+        webTestClient.patch()
+                .uri("/api/v1/vendors/someId")
+                .body(vendorMono, Vendor.class)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(vendorRepository, never()).save(any());
     }
 
 }
